@@ -89,7 +89,8 @@ function printToolbar()
 	print "<div class=\"toolbar\">";
  	print "<a class=\"tool\" href=\"" . SELF . "\">". DEFAULT_PAGE . "</a>";	
 	print "<a class=\"tool first\" href=\"" . SELF . "?action=edit&amp;page=$upage\">Edit</a> ";
-//	print "<a class=\"tool first\" href=\"" . SELF . "?action=rename&amp;page=$upage\">Rename</a> ";	
+//	print "<a class=\"tool first\" href=\"" . SELF . "?action=rename&amp;page=$upage\">Rename</a> ";
+//	print "<a class=\"tool first\" href=\"" . SELF . "?action=delete&amp;page=$upage\">Delete</a> ";	
 	print "<a class=\"tool\" href=\"" . SELF . "?action=new\">New</a> ";
 
 	if ( !DISABLE_UPLOADS )
@@ -321,6 +322,35 @@ else if ( $action == "save" )
 
 	$html .= toHTML($newText);
 }
+
+/*
+else if ( $action == "delete" )
+{
+	$html = "<form id=\"delete\" method=\"post\" action=\"" . SELF . "\">";
+	$html .= "<input id=\"title\" type=\"hidden\" name=\"page\" value=\"" . htmlspecialchars($page) . "\" ";
+	$html .= "<p>".$text."</p>\n";
+
+	$html .= "<input id=\"delete\" type=\"submit\" value=\"Delete\">";
+	$html .= "<input id=\"cancel\" type=\"button\" onclick=\"history.go(-1);\" value=\"Cancel\" />\n";
+	$html .= "<input type=\"hidden\" name=\"action\" value=\"deleted\" />";
+	$html .= "<input type=\"hidden\" name=\"prevpage\" value=\"" . htmlspecialchars($page) . "\" />";
+	$html .= "</p></form>";
+}
+else if ( $action == "deleted" )
+{
+	$filename = PAGES_PATH . "/$page.txt";
+
+	$errLevel = error_reporting(0);
+	$success = unlink($filename);
+ 	error_reporting($errLevel);
+
+	if ( $success )	
+		$html = "<p class=\"note\">Deleted</p>\n";
+	else
+		$html = "<p class=\"note\">Error deleting file! Make sure your web server has write access to " . PAGES_PATH . "</p>\n";
+}
+*/
+
 /*
 else if ( $action == "rename" )
 {
