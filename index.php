@@ -196,6 +196,7 @@ if ( !function_exists('file_put_contents') )
 }
 
 // Main code
+global $text;
 
 if ( isset($_REQUEST['action']) )
 	$action = $_REQUEST['action'];
