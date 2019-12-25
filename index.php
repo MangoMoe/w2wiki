@@ -89,6 +89,7 @@ function printToolbar()
 	print "<div class=\"toolbar\">";
  	print "<a class=\"tool\" href=\"" . SELF . "\">". DEFAULT_PAGE . "</a>";	
 	print "<a class=\"tool first\" href=\"" . SELF . "?action=edit&amp;page=$upage\">Edit</a> ";
+//	print "<a class=\"tool first\" href=\"" . SELF . "?action=rename&amp;page=$upage\">Rename</a> ";	
 	print "<a class=\"tool\" href=\"" . SELF . "?action=new\">New</a> ";
 
 	if ( !DISABLE_UPLOADS )
