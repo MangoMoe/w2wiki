@@ -87,6 +87,7 @@ function printToolbar()
 	global $upage, $page, $action;
 
 	print "<div class=\"toolbar\">";
+ 	print "<a class=\"tool\" href=\"" . SELF . "\">". DEFAULT_PAGE . "</a>";	
 	print "<a class=\"tool first\" href=\"" . SELF . "?action=edit&amp;page=$upage\">Edit</a> ";
 	print "<a class=\"tool\" href=\"" . SELF . "?action=new\">New</a> ";
 
@@ -95,7 +96,6 @@ function printToolbar()
 
  	print "<a class=\"tool\" href=\"" . SELF . "?action=all_name\">All</a> ";
 	print "<a class=\"tool\" href=\"" . SELF . "?action=all_date\">Recent</a> ";
- 	print "<a class=\"tool\" href=\"" . SELF . "\">". DEFAULT_PAGE . "</a>";
  	
 	if ( REQUIRE_PASSWORD )
 		print '<a class="tool" href="' . SELF . '?action=logout">Exit</a>';
