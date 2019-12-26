@@ -9,6 +9,11 @@
  *
  * Written with Coda: <http://panic.com/coda/>
  *
+ *
+ * Updated to new version by Ionel BOBOC (Bobby)
+ * 2019
+ * https://github.com/iboboc/w2wiki
+ *
  */
 
 // --------------------
@@ -49,19 +54,6 @@ define('SELF', $_SERVER['SCRIPT_NAME']);
 
 define('VIEW', '');
 
-// DEFAULT_PAGE
-//
-// The name of the page to show as the "Home" page.
-// Value is a string, the title of a page (case-sensitive!)
-
-define('DEFAULT_PAGE', 'Home');
-
-// CSS_FILE
-//
-// The CSS file to load to style the wiki, relative to BASE_URI
-
-define('CSS_FILE', 'index.css');
-
 // --------------------
 // File upload settings
 // --------------------
@@ -90,6 +82,19 @@ define('VALID_UPLOAD_EXTS', 'jpg,jpeg,png,gif,pdf,zip,dmg');
 // Interface settings
 // ------------------
 
+// DEFAULT_PAGE
+//
+// The name of the page to show as the "Home" page.
+// Value is a string, the title of a page (case-sensitive!)
+
+define('DEFAULT_PAGE', 'Home');
+
+// FOOTER
+//
+// The text in the footer
+
+define('FOOTER_TEXT', '&copy; 2019 Bobby | Galati (<a href="https:\\github.com\iboboc\w2wiki">GITHUB</a>)');
+
 // TITLE_DATE
 //
 // The format to use when displaying page modification times.
@@ -111,7 +116,7 @@ define('EDIT_ROWS', 18);
 // to the named page. This might degrade performance if you have many
 // thousands of pages.
 
-define('AUTOLINK_PAGE_TITLES', false);
+define('AUTOLINK_PAGE_TITLES', true);
 
 
 // -----------------------------
@@ -129,7 +134,7 @@ define('REQUIRE_PASSWORD', false);
 // The password for the wiki, if REQUIRE_PASSWORD is true
 // Replace 'secret' with your password to set your password.
 
-define('W2_PASSWORD', 'secret');
+define('W2_PASSWORD', '');
 
 // W2_PASSWORD_HASH
 //
@@ -142,7 +147,7 @@ define('W2_PASSWORD', 'secret');
 //
 // define('W2_PASSWORD_HASH', 'e5e9fa1ba31ecd1ae84f75caaa474f3a663f05f4');
 
-define('W2_PASSWORD_HASH', '');
+//define('W2_PASSWORD_HASH', '');
 
 // allowedIPs
 //
