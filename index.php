@@ -10,6 +10,10 @@
  *
  * Written with Coda: <http://panic.com/coda/>
  *
+ * Updated to new version by Ionel BOBOC (Bobby)
+ * 2019
+ * https://github.com/iboboc/w2wiki
+ *
  */
  
 // Install PSR-4-compatible class autoloader
@@ -69,12 +73,13 @@ if ( REQUIRE_PASSWORD && !isset($_SESSION['password']) )
 		print "<link rel=\"apple-touch-icon\" href=\"apple-touch-icon.png\"/>";
 		print "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=false\" />\n";
 		
-		print "<link type=\"text/css\" rel=\"stylesheet\" href=\"" . BASE_URI . "/" . CSS_FILE ."\" />\n";
+		print "<link type=\"text/css\" rel=\"stylesheet\" href=\"" . BASE_URI . "/mini-default.min.css\" />\n";
 		print "<title>Log In</title>\n";
 		print "</head>\n";
-		print "<body><form method=\"post\">";
+		print "<body><div class=\"container\"><form method=\"post\">";
+		print "<label for=\"password\">Password:</label>\n";
 		print "<input type=\"password\" name=\"p\">\n";
-		print "<input type=\"submit\" value=\"Go\"></form>";
+		print "<input type=\"submit\" value=\"Go\"></form></div>";
 		print "</body></html>";
 		exit;
 	}
@@ -86,26 +91,26 @@ function printToolbar()
 {
 	global $upage, $page, $action;
 
-	print "<div class=\"toolbar\">";
- 	print "<a class=\"tool\" href=\"" . SELF . "\">". DEFAULT_PAGE . "</a>";	
-	print "<a class=\"tool first\" href=\"" . SELF . "?action=edit&amp;page=$upage\">Edit</a> ";
-//	print "<a class=\"tool first\" href=\"" . SELF . "?action=rename&amp;page=$upage\">Rename</a> ";
-//	print "<a class=\"tool first\" href=\"" . SELF . "?action=delete&amp;page=$upage\">Delete</a> ";	
-	print "<a class=\"tool\" href=\"" . SELF . "?action=new\">New</a> ";
+	print "<header class=\"sticky\">";
+ 	print "<a class=\"logo\" href=\"" . SELF . "\">". DEFAULT_PAGE . "</a>";
+	print "<a class=\"button first\" href=\"" . SELF . "?action=edit&amp;page=$upage\"><span class=\"icon-edit\"></span> Edit</a> ";
+//	print "<a class=\"button first\" href=\"" . SELF . "?action=rename&amp;page=$upage\">Rename</a> ";
+//	print "<a class=\"button first\" href=\"" . SELF . "?action=delete&amp;page=$upage\">Delete</a> ";
+	print "<a class=\"button\" href=\"" . SELF . "?action=new\">New</a> ";
 
 	if ( !DISABLE_UPLOADS )
-		print "<a class=\"tool\" href=\"" . SELF . VIEW . "?action=upload\">Upload</a> ";
+		print "<a class=\"button\" href=\"" . SELF . VIEW . "?action=upload\"><span class=\"icon-upload\"></span> Upload</a> ";
 
- 	print "<a class=\"tool\" href=\"" . SELF . "?action=all_name\">All</a> ";
-	print "<a class=\"tool\" href=\"" . SELF . "?action=all_date\">Recent</a> ";
+ 	print "<a class=\"button\" href=\"" . SELF . "?action=all_name\">All</a> ";
+	print "<a class=\"button\" href=\"" . SELF . "?action=all_date\">Recent</a> ";
  	
 	if ( REQUIRE_PASSWORD )
-		print '<a class="tool" href="' . SELF . '?action=logout">Exit</a>';
+		print '<a class="button" href="' . SELF . '?action=logout"><span class=\"icon-lock\"></span> Exit</a>';
 
 	print "<form method=\"post\" action=\"" . SELF . "?action=search\">\n";
-	print "<input class=\"tool\" placeholder=\"Search\" size=\"6\" id=\"search\" type=\"text\" name=\"q\" /></form>\n";
-		
-	print "</div>\n";
+	print "<input class=\"button\" placeholder=\"Search\" size=\"6\" id=\"search\" type=\"text\" name=\"q\" /></form>\n";
+	
+	print "</header>\n";
 }
 
 
@@ -136,7 +141,7 @@ function toHTML($inText)
 		if ( $filename{0} == '.' )
 			continue;
 			
-		$filename = preg_replace("/(.*?)\.txt/", "\\1", $filename);
+		$filename = preg_replace("/(.*?)\.md/", "\\1", $filename);
 		$filenames[] = $filename;
 	}
 	closedir($dir);
@@ -153,6 +158,7 @@ function toHTML($inText)
 	
  	$inText = preg_replace("/\[\[(.*?)\]\]/", "<a href=\"" . SELF . VIEW . "/\\1\">\\1</a>", $inText);
 	$inText = preg_replace("/\{\{(.*?)\}\}/", "<img src=\"" . BASE_URI . "/images/\\1\" alt=\"\\1\" />", $inText);
+	//$inText = preg_replace("/\{\{(.*?)\}\}/", BASE_URI . "/images/\\1", $inText);
 	$inText = preg_replace("/message:(.*?)\s/", "[<a href=\"message:\\1\">email</a>]", $inText);
 
 	$html = MarkdownExtra::defaultTransform($inText);
@@ -198,7 +204,7 @@ if ( !function_exists('file_put_contents') )
 }
 
 // Main code
-global $text;
+	global $text;
 
 if ( isset($_REQUEST['action']) )
 	$action = $_REQUEST['action'];
@@ -220,7 +226,7 @@ $upage = urlencode($page);
 if ( $page == "" )
 	$page = DEFAULT_PAGE;
 
-$filename = PAGES_PATH . "/$page.txt";
+$filename = PAGES_PATH . "/$page.md";
 
 if ( file_exists($filename) )
 {
@@ -238,20 +244,25 @@ if ( $action == "edit" || $action == "new" )
 {
 	$formAction = SELF . (($action == 'edit') ? "/$page" : "");
 	$html = "<form id=\"edit\" method=\"post\" action=\"$formAction\">\n";
+	$html .= "<fieldset>\n";
+
 
 	if ( $action == "edit" )
 		$html .= "<input type=\"hidden\" name=\"page\" value=\"$page\" />\n";
 	else
-		$html .= "<p>Title: <input id=\"title\" type=\"text\" name=\"page\" /></p>\n";
+		$html .= "<label for=\"title\">Title</label><input id=\"title\" type=\"text\" name=\"page\" style=\"width:100%;\" />\n";
+
 
 	if ( $action == "new" )
-		$text = "";
+		$text = " ";
 
-	$html .= "<p><textarea id=\"text\" name=\"newText\" rows=\"" . EDIT_ROWS . "\">$text</textarea></p>\n";
-	$html .= "<p><input type=\"hidden\" name=\"action\" value=\"save\" />";
+	$html .= "<textarea id=\"text\" name=\"newText\" style=\"width:100%;\" rows=\"" . EDIT_ROWS . "\">$text</textarea>\n";
+	$html .= "<input type=\"hidden\" name=\"action\" value=\"save\" />";
 	$html .= "<input id=\"save\" type=\"submit\" value=\"Save\" />\n";
-	$html .= "<input id=\"cancel\" type=\"button\" onclick=\"history.go(-1);\" value=\"Cancel\" /></p>\n";
+	$html .= "<input id=\"cancel\" type=\"button\" onclick=\"history.go(-1);\" value=\"Cancel\" />\n";
+	$html .= "</fieldset>\n";
 	$html .= "</form>\n";
+
 }
 else if ( $action == "logout" )
 {
@@ -269,7 +280,9 @@ else if ( $action == "upload" )
 	{
 		$html = "<form id=\"upload\" method=\"post\" action=\"" . SELF . "\" enctype=\"multipart/form-data\"><p>\n";
 		$html .= "<input type=\"hidden\" name=\"action\" value=\"uploaded\" />";
-		$html .= "<input id=\"file\" type=\"file\" name=\"userfile\" />\n";
+		$html .= "<input id=\"file\" type=\"file\" name=\"userfile\" style=\"display:none\" />\n";
+		$html .= "<label for=\"file\" class=\"button\">Select file</label>";
+
 		$html .= "<input id=\"upload\" type=\"submit\" value=\"Upload\" />\n";
 		$html .= "<input id=\"cancel\" type=\"button\" onclick=\"history.go(-1);\" value=\"Cancel\" />\n";
 		$html .= "</p></form>\n";
@@ -292,16 +305,16 @@ else if ( $action == "uploaded" )
 			if ( move_uploaded_file($_FILES['userfile']['tmp_name'], 
 				BASE_PATH . "/images/$dstName") === true ) 
 			{
-				$html = "<p class=\"note\">File '$dstName' uploaded</p>\n";
+				$html = "<span class=\"toast\">File '$dstName' uploaded</span>\n";
 			}
 			else
 			{
-				$html = "<p class=\"note\">Upload error</p>\n";
+				$html = "<span class=\"toast\">Upload error</span>\n";
 			}
 
 			error_reporting($errLevel);
 		} else {
-			$html = "<p class=\"note\">Upload error: invalid file type</p>\n";
+			$html = "<span class=\"toast\">Upload error: invalid file type</span>\n";
 		}
 	}
 
@@ -316,13 +329,15 @@ else if ( $action == "save" )
  	error_reporting($errLevel);
 
 	if ( $success )	
-		$html = "<p class=\"note\">Saved</p>\n";
+		$html = "<span class=\"toast\">Saved!</span>";
 	else
-		$html = "<p class=\"note\">Error saving changes! Make sure your web server has write access to " . PAGES_PATH . "</p>\n";
+		$html = "<span class=\"toast\">Error saving changes! Make sure your web server has write access to " . PAGES_PATH . "</span>\n";
 
 	$html .= toHTML($newText);
 }
 
+
+//bobby
 /*
 else if ( $action == "delete" )
 {
@@ -338,7 +353,7 @@ else if ( $action == "delete" )
 }
 else if ( $action == "deleted" )
 {
-	$filename = PAGES_PATH . "/$page.txt";
+	$filename = PAGES_PATH . "/$page.md";
 
 	$errLevel = error_reporting(0);
 	$success = unlink($filename);
@@ -370,7 +385,7 @@ else if ( $action == "renamed" )
 	$prevpage = sanitizeFilename($pp);
 	$prevpage = urlencode($prevpage);
 	
-	$prevfilename = PAGES_PATH . "/$prevpage.txt";
+	$prevfilename = PAGES_PATH . "/$prevpage.md";
 
 	if ( rename($prevfilename, $filename) )
 	{
@@ -397,41 +412,37 @@ else if ( $action == "all_name" )
 	$dir = opendir(PAGES_PATH);
 	$filelist = array();
 
-	$color = "#ffffff";
-
 	while ( $file = readdir($dir) )
 	{
 		if ( $file{0} == "." )
 			continue;
 
-		$afile = preg_replace("/(.*?)\.txt/", "<a href=\"" . SELF . VIEW . "/\\1\">\\1</a>", $file);
-		$efile = preg_replace("/(.*?)\.txt/", "<a href=\"?action=edit&amp;page=\\1\">edit</a>", urlencode($file));
+		$afile = preg_replace("/(.*?)\.md/", "<a href=\"" . SELF . VIEW . "/\\1\">\\1</a>", $file);
+		$efile = preg_replace("/(.*?)\.md/", "<a href=\"?action=edit&amp;page=\\1\">edit</a>", urlencode($file));
+		$sfile = filesize(PAGES_PATH . "/$file");
+		$dfile = date(TITLE_DATE, filemtime(PAGES_PATH . "/$file"));
 
-		array_push($filelist, "<tr style=\"background-color: $color;\"><td>$afile</td><td width=\"20\"></td><td>$efile</td></tr>");
+		array_push($filelist, "<tr><td data-label=\"File\">$afile</td><td data-label=\"Date\">$dfile</td><td data-label=\"Size\">$sfile</td><td data-label=\"Action\">$efile</td></tr>");
 
-		if ( $color == "#ffffff" )
-			$color = "#f4f4f4";
-		else
-			$color = "#ffffff";
 	}
 
 	closedir($dir);
 
 	natcasesort($filelist);
 	
-	$html = "<table>";
-
+	$html = "<table class=\"hoverable striped\"><thead><tr><th>File</th><th>Date</th><th>Size</th><th>Action</th></tr></thead><tbody>\n";
 
 	for ($i = 0; $i < count($filelist); $i++)
 	{
 		$html .= $filelist[$i];
 	}
 
-	$html .= "</table>\n";
+	$html .= "</tbody></table>\n";
 }
 else if ( $action == "all_date" )
 {
-	$html = "<table>\n";
+	$html = "<table class=\"hoverable striped\"><thead><tr><th>File</th><th>Date</th><th>Size</th><th>Action</th></tr></thead><tbody>\n";
+
 	$dir = opendir(PAGES_PATH);
 	$filelist = array();
 	while ( $file = readdir($dir) )
@@ -439,24 +450,24 @@ else if ( $action == "all_date" )
 		if ( $file{0} == "." )
 			continue;
 			
-		$filelist[preg_replace("/(.*?)\.txt/", "<a href=\"" . SELF . VIEW . "/\\1\">\\1</a>", $file)] = filemtime(PAGES_PATH . "/$file");
+		$filelist[$file] = filemtime(PAGES_PATH . "/$file");
+
 	}
 
 	closedir($dir);
 
-	$color = "#ffffff";
-	arsort($filelist, SORT_NUMERIC);
+	arsort($filelist, SORT_NATURAL);
 
 	foreach ($filelist as $key => $value)
 	{
-		$html .= "<tr style=\"background-color: $color;\"><td valign=\"top\">$key</td><td width=\"20\"></td><td valign=\"top\"><nobr>" . date(TITLE_DATE_NO_TIME, $value) . "</nobr></td></tr>\n";
+		$afile = preg_replace("/(.*?)\.md/", "<a href=\"" . SELF . VIEW . "/\\1\">\\1</a>", $key);
+		$efile = preg_replace("/(.*?)\.md/", "<a href=\"?action=edit&amp;page=\\1\">edit</a>", urlencode($key));
+		$sfile = filesize(PAGES_PATH . "/$key");
+
+		$html .= "<tr><td data-label=\"File\">$afile</td><td data-label=\"Date\">" . date(TITLE_DATE, $value) . "</td><td data-label=\"Size\">$sfile</td><td data-label=\"Action\">$efile</td></tr>\n";
 		
-		if ( $color == "#ffffff" )
-			$color = "#f4f4f4";
-		else
-			$color = "#ffffff";
 	}
-	$html .= "</table>\n";
+	$html .= "</tbody></table>\n";
 }
 else if ( $action == "search" )
 {
@@ -478,7 +489,7 @@ else if ( $action == "search" )
                         if ( preg_match("/{$q}/i", $text) || preg_match("/{$q}/i", $file) )
 			{
 				++$matches;
-				$file = preg_replace("/(.*?)\.txt/", "<a href=\"" . SELF . VIEW . "/\\1\">\\1</a>", $file);
+				$file = preg_replace("/(.*?)\.md/", "<a href=\"" . SELF . VIEW . "/\\1\">\\1</a>", $file);
 				$html .= "<li>$file</li>\n";
 			}
 		}
@@ -491,13 +502,17 @@ else if ( $action == "search" )
 }
 else
 {
+	global $text;
 	$html = toHTML($text);
 }
 
 $datetime = '';
 
-if ( ($action == "all_name") || ($action == "all_date"))
+if ($action == "all_name")
 	$title = "All Pages";
+
+else if ($action == "all_date")
+	$title = "Recent Pages";
 	
 else if ( $action == "upload" )
 	$title = "Upload Image";
@@ -530,17 +545,30 @@ print "<head>\n";
 print "<link rel=\"apple-touch-icon\" href=\"apple-touch-icon.png\"/>";
 print "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=false\" />\n";
 
-print "<link type=\"text/css\" rel=\"stylesheet\" href=\"" . BASE_URI . "/" . CSS_FILE ."\" />\n";
+print "<link type=\"text/css\" rel=\"stylesheet\" href=\"" . BASE_URI . "/mini-default.min.css\" />\n";
 print "<title>$title</title>\n";
 print "</head>\n";
 print "<body>\n";
-print "<div class=\"titlebar\">$title <span style=\"font-weight: normal;\">$datetime</span></div>\n";
 
 printToolbar();
+
+print "<header class=\"sticky\">";
+print "<span class=\"logo\">$title</span>\n";
+if ($datetime == "")
+ $datetime= date(TITLE_DATE);
+print "<span class=\"button\">$datetime</span>\n";
+
+
+print "</header>";
 
 print "<div class=\"main\">\n";
 print "$html\n";
 print "</div>\n";
+
+print "<footer class=\"sticky\">\n";
+print "<p>". FOOTER_TEXT . "</p>\n";
+print "</footer>\n";
+
 
 print "</body>\n";
 print "</html>\n";
