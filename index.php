@@ -73,7 +73,7 @@ if ( REQUIRE_PASSWORD && !isset($_SESSION['password']) )
 		print "<link rel=\"apple-touch-icon\" href=\"apple-touch-icon.png\"/>";
 		print "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=false\" />\n";
 		
-		print "<link type=\"text/css\" rel=\"stylesheet\" href=\"" . BASE_URI . "/mini-default.min.css\" />\n";
+		print "<link type=\"text/css\" rel=\"stylesheet\" href=\"" . BASE_URI . "/mini.css\" />\n";
 		print "<title>Log In</title>\n";
 		print "</head>\n";
 		print "<body><div class=\"container\"><form method=\"post\">";
@@ -580,7 +580,7 @@ print "<head>\n";
 print "<link rel=\"apple-touch-icon\" href=\"apple-touch-icon.png\"/>";
 print "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=false\" />\n";
 
-print "<link type=\"text/css\" rel=\"stylesheet\" href=\"" . BASE_URI . "/mini-default.min.css\" />\n";
+print "<link type=\"text/css\" rel=\"stylesheet\" href=\"" . BASE_URI . "/mini.css\" />\n";
 print "<title>$title</title>\n";
 print "</head>\n";
 print "<body>\n";
