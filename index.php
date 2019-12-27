@@ -87,9 +87,46 @@ if ( REQUIRE_PASSWORD && !isset($_SESSION['password']) )
 
 // Support functions
 
+function printDrawer()
+{
+	print "<label for=\"drawer-control\" class=\"drawer-toggle persistent\"></label>\n";
+	print "<input type=\"checkbox\" id=\"drawer-control\" class=\"drawer persistent\">\n<div>\n";
+	print "<p># Header 1</p>\n";
+	print "<p>## Header 2</p>\n";
+	print "<p>### Header 3</p>\n";
+	print "<p>#### Header 4</p>\n";
+	print "<p>##### Header 5</p>\n";
+	print "<p>###### Header 6</p>\n\n";
+	print "<p>**Bold**</p>\n";
+	print "<p>*Emphasize*</p>\n";
+	print "<p>++Underline++</p>\n";
+	print "<p>~~Strikethrouh~~</p>\n";
+	print "<p>==Highlight==</p>\n";
+	print "<p>^Superscript^</p>\n";
+	print "<p>~Subscript~</p>\n\n";
+	print "<p>[[Link to page]]</p>\n";
+	print "<p><http://example.com/></p>\n";
+	print "<p>~[Alt text](http://url)</p>\n";
+	print "<p>[link text](http://url)</p>\n\n";
+	print "<p>{{uploadimagename}}</p>\n";
+	print "<p>![Alt text](/path/to/img.jpg)</p>\n";
+	print "<p>![Alt text](/path/to/img.jpg \"Optional title\")</p>\n\n";
+	print "<p>- Unordered list</p>\n";
+	print "<p>+ Unordered list</p>\n";
+	print "<p>* Unordered list</p>\n";
+	print "<p>1. Ordered list</p>\n\n";
+	print "<p>> Blockquotes</p>\n";
+	print "<p>    Code block</p>\n";
+	print "<p>``Code``</p>\n\n";
+	print "<p>*** Horizontal rule</p>\n";
+	print "<p>--- Horizontal rule</p>\n";
+	print "</div>\n";
+}
+
 function printToolbar()
 {
 	global $upage, $page, $action;
+
 
 	print "<header class=\"sticky\">";
  	print "<a class=\"logo\" href=\"" . SELF . "\">". DEFAULT_PAGE . "</a>";
@@ -107,10 +144,8 @@ function printToolbar()
 	if ( REQUIRE_PASSWORD )
 		print '<a class="button" href="' . SELF . '?action=logout"><span class=\"icon-lock\"></span> Exit</a>';
 
-	print "<form method=\"post\" action=\"" . SELF . "?action=search\">\n";
-	print "<input class=\"button\" placeholder=\"Search\" size=\"6\" id=\"search\" type=\"text\" name=\"q\" /></form>\n";
-	
 	print "</header>\n";
+
 }
 
 
@@ -557,18 +592,20 @@ print "<span class=\"logo\">$title</span>\n";
 if ($datetime == "")
  $datetime= date(TITLE_DATE);
 print "<span class=\"button\">$datetime</span>\n";
-
-
+printDrawer();
 print "</header>";
+
 
 print "<div class=\"main\">\n";
 print "$html\n";
 print "</div>\n";
 
+print "<form method=\"post\" action=\"" . SELF . "?action=search\">\n";
+print "<input class=\"button\" placeholder=\"Search\" id=\"search\" type=\"text\" name=\"q\" /><input id=\"ok\" type=\"submit\" value=\"Search\" /></form>\n";
+
 print "<footer class=\"sticky\">\n";
 print "<p>". FOOTER_TEXT . "</p>\n";
 print "</footer>\n";
-
 
 print "</body>\n";
 print "</html>\n";
