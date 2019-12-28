@@ -1,3 +1,5 @@
+![Logo](https://github.com/iboboc/w2wiki/blob/master/icon.png "W2Wiki Logo")
+
 # W2: Simple web notes
 ### by Ionel BOBOC (Bobby)
 #### A web-based, wiki-like notepad using Markdown syntax that you host yourself.
