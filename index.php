@@ -21,13 +21,10 @@ spl_autoload_register(function($class){
 	require str_replace('\\', DIRECTORY_SEPARATOR, ltrim($class, '\\')).'.php';
 });
 
-
 // Get Markdown class
 use Michelf\MarkdownExtra;
 
-
 // User configurable options:
-
 include_once "config.php";
 
 ini_set('session.gc_maxlifetime', W2_SESSION_LIFETIME);
@@ -52,7 +49,7 @@ if ( count($allowedIPs) > 0 )
 	
 	if ( !$accepted )
 	{
-		print "<html><body>Access from IP address $ip is not allowed";
+		print "<html><body><h1>W2Wiki <small>Access from IP address $ip is not allowed</small></h1>";
 		print "</body></html>";
 		exit;
 	}
@@ -70,13 +67,14 @@ if ( REQUIRE_PASSWORD && !isset($_SESSION['password']) )
 		print "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n";
 		print "<html>\n";
 		print "<head>\n";
-		print "<link rel=\"apple-touch-icon\" href=\"apple-touch-icon.png\"/>";
+		print "<link rel=\"apple-touch-icon\" href=\"icon.png\"/>";
 		print "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=false\" />\n";
 		
 		print "<link type=\"text/css\" rel=\"stylesheet\" href=\"" . BASE_URI . "/mini.css\" />\n";
 		print "<title>Log In</title>\n";
 		print "</head>\n";
 		print "<body><div class=\"container\"><form method=\"post\">";
+		print "<img src=\"icon.png\" >\n";
 		print "<label for=\"password\">Password:</label>\n";
 		print "<input type=\"password\" name=\"p\">\n";
 		print "<input type=\"submit\" value=\"Go\"></form></div>";
@@ -86,53 +84,102 @@ if ( REQUIRE_PASSWORD && !isset($_SESSION['password']) )
 }
 
 // Support functions
+function markdown_toc($file)
+{
+
+  // ensure using only "\n" as line-break
+  $source = str_replace(["\r\n", "\r"], "\n", $file);
+
+  // look for markdown TOC items
+  preg_match_all(
+    '/^(#).*$/m',
+    $source,
+    $matches,
+    PREG_PATTERN_ORDER | PREG_OFFSET_CAPTURE
+  );
+
+  // preprocess: iterate matched lines to create an array of items
+  // where each item is an array(level, text)
+  $file_size = strlen($source);
+  foreach ($matches[0] as $item) {
+    $found_mark = substr($item[0], 0, 1);
+    if ($found_mark == '#') {
+      // text is the found item
+      $item_text = $item[0];
+      $item_level = strrpos($item_text, '#') + 1;
+      $item_text = substr($item_text, $item_level);
+    } else {
+      // text is the previous line (empty if <hr>)
+      $item_offset = $item[1];
+      $prev_line_offset = strrpos($source, "\n", -($file_size - $item_offset + 2));
+      $item_text =
+        substr($source, $prev_line_offset, $item_offset - $prev_line_offset - 1);
+      $item_text = trim($item_text);
+      $item_level = $found_mark == '=' ? 1 : 2;
+    }
+    if (!trim($item_text) OR strpos($item_text, '|') !== FALSE) {
+      // item is an horizontal separator or a table header, don't mind
+      continue;
+    }
+    $raw_toc[] = ['level' => $item_level, 'text' => trim($item_text)];
+  }
+	$toc_text = "<h1>Table of Content</h1>";
+	foreach ($raw_toc as $key => $value)
+	{
+		$toc_text .= "<a href=\"#".$value['text']."\">".$value['text']."</a><br>\n";
+	}
+	$toc_text .= "<hr>";
+	return $toc_text;
+}
+
 
 function printDrawer()
 {
 	print "<label for=\"drawer-control\" class=\"drawer-toggle persistent\"></label>\n";
 	print "<input type=\"checkbox\" id=\"drawer-control\" class=\"drawer persistent\">\n<div>\n";
-	print "<p># Header 1</p>\n";
-	print "<p>## Header 2</p>\n";
-	print "<p>### Header 3</p>\n";
-	print "<p>#### Header 4</p>\n";
-	print "<p>##### Header 5</p>\n";
-	print "<p>###### Header 6</p>\n\n";
-	print "<p>**Bold**</p>\n";
-	print "<p>*Emphasize*</p>\n";
-	print "<p>++Underline++</p>\n";
-	print "<p>~~Strikethrouh~~</p>\n";
-	print "<p>==Highlight==</p>\n";
-	print "<p>^Superscript^</p>\n";
-	print "<p>~Subscript~</p>\n\n";
-	print "<p>[[Link to page]]</p>\n";
-	print "<p><http://example.com/></p>\n";
-	print "<p>~[Alt text](http://url)</p>\n";
-	print "<p>[link text](http://url)</p>\n\n";
-	print "<p>{{uploadimagename}}</p>\n";
-	print "<p>![Alt text](/path/to/img.jpg)</p>\n";
-	print "<p>![Alt text](/path/to/img.jpg \"Optional title\")</p>\n\n";
-	print "<p>- Unordered list</p>\n";
-	print "<p>+ Unordered list</p>\n";
-	print "<p>* Unordered list</p>\n";
-	print "<p>1. Ordered list</p>\n\n";
-	print "<p>> Blockquotes</p>\n";
-	print "<p>    Code block</p>\n";
-	print "<p>``Code``</p>\n\n";
-	print "<p>*** Horizontal rule</p>\n";
-	print "<p>--- Horizontal rule</p>\n";
+	print "<label for=\"drawer-control\" class=\"drawer-close\"></label>\n";
+	print "<h5><b>Markdown Syntax Helper</b>\n";
+	print "<small>[TOC]</small>\n";	
+	print "<small># Header 1</small>\n";
+	print "<small>## Header 2</small>\n";
+	print "<small>### Header 3</small>\n";
+	print "<small>#### Header 4</small>\n";
+	print "<small>##### Header 5</small>\n";
+	print "<small>###### Header 6</small>\n\n";
+	print "<small>**Bold**</small>\n";
+	print "<small>*Emphasize*</small>\n";
+	print "<small>++Underline++</small>\n";
+	print "<small>~~Strikethrouh~~</small>\n";
+	print "<small>==Highlight==</small>\n";
+	print "<small>^Superscript^</small>\n";
+	print "<small>~Subscript~</small>\n\n";
+	print "<small>[[Link to page]]</small>\n";
+	print "<small><http://example.com/></small>\n";
+	print "<small>~[Alt text](http://url)</small>\n";
+	print "<small>[link text](http://url)</small>\n\n";
+	print "<small>{{uploadimagename}}</small>\n";
+	print "<small>![Alt text](/path/to/img.jpg)</small>\n";
+	print "<small>![Alt text](/path/to/img.jpg \"Optional title\")</small>\n\n";
+	print "<small>- Unordered list</small>\n";
+	print "<small>+ Unordered list</small>\n";
+	print "<small>* Unordered list</small>\n";
+	print "<small>1. Ordered list</small>\n\n";
+	print "<small>>Blockquotes</small>\n";
+	print "<small>    Code block</small>\n";
+	print "<small>``Code``</small>\n\n";
+	print "<small>*** Horizontal rule</small>\n";
+	print "<small>--- Horizontal rule</small></h5>\n";
 	print "</div>\n";
 }
+
 
 function printToolbar()
 {
 	global $upage, $page, $action;
 
-
 	print "<header class=\"sticky\">";
  	print "<a class=\"logo\" href=\"" . SELF . "\">". DEFAULT_PAGE . "</a>";
 	print "<a class=\"button first\" href=\"" . SELF . "?action=edit&amp;page=$upage\"><span class=\"icon-edit\"></span> Edit</a> ";
-//	print "<a class=\"button first\" href=\"" . SELF . "?action=rename&amp;page=$upage\">Rename</a> ";
-//	print "<a class=\"button first\" href=\"" . SELF . "?action=delete&amp;page=$upage\">Delete</a> ";
 	print "<a class=\"button\" href=\"" . SELF . "?action=new\">New</a> ";
 
 	if ( !DISABLE_UPLOADS )
@@ -140,12 +187,12 @@ function printToolbar()
 
  	print "<a class=\"button\" href=\"" . SELF . "?action=all_name\">All</a> ";
 	print "<a class=\"button\" href=\"" . SELF . "?action=all_date\">Recent</a> ";
+	print "<a class=\"button\" href=\"" . SELF . "?action=all_cards\">Cards</a> ";
  	
 	if ( REQUIRE_PASSWORD )
 		print '<a class="button" href="' . SELF . '?action=logout"><span class=\"icon-lock\"></span> Exit</a>';
 
 	print "</header>\n";
-
 }
 
 
@@ -193,8 +240,10 @@ function toHTML($inText)
 	
  	$inText = preg_replace("/\[\[(.*?)\]\]/", "<a href=\"" . SELF . VIEW . "/\\1\">\\1</a>", $inText);
 	$inText = preg_replace("/\{\{(.*?)\}\}/", "<img src=\"" . BASE_URI . "/images/\\1\" alt=\"\\1\" />", $inText);
-	//$inText = preg_replace("/\{\{(.*?)\}\}/", BASE_URI . "/images/\\1", $inText);
 	$inText = preg_replace("/message:(.*?)\s/", "[<a href=\"message:\\1\">email</a>]", $inText);
+
+	$tocText = markdown_toc($inText);
+	$inText = preg_replace("/\[TOC\]/", $tocText, $inText);
 
 	$html = MarkdownExtra::defaultTransform($inText);
 	$inText = htmlentities($inText);
@@ -218,7 +267,6 @@ function destroy_session()
 }
 
 // Support PHP4 by defining file_put_contents if it doesn't already exist
-
 if ( !function_exists('file_put_contents') )
 {
     function file_put_contents($n, $d)
@@ -372,8 +420,7 @@ else if ( $action == "save" )
 }
 
 
-//bobby
-/*
+//experimental
 else if ( $action == "delete" )
 {
 	$html = "<form id=\"delete\" method=\"post\" action=\"" . SELF . "\">";
@@ -386,6 +433,7 @@ else if ( $action == "delete" )
 	$html .= "<input type=\"hidden\" name=\"prevpage\" value=\"" . htmlspecialchars($page) . "\" />";
 	$html .= "</p></form>";
 }
+
 else if ( $action == "deleted" )
 {
 	$filename = PAGES_PATH . "/$page.md";
@@ -395,13 +443,12 @@ else if ( $action == "deleted" )
  	error_reporting($errLevel);
 
 	if ( $success )	
-		$html = "<p class=\"note\">Deleted</p>\n";
+		$html = "<span class=\"toast\">Deleted</span>\n";
 	else
-		$html = "<p class=\"note\">Error deleting file! Make sure your web server has write access to " . PAGES_PATH . "</p>\n";
+		$html = "<span class=\"toast\">Error deleting file! Make sure your web server has write access to " . PAGES_PATH . "</span>\n";
 }
-*/
 
-/*
+
 else if ( $action == "rename" )
 {
 	$html = "<form id=\"rename\" method=\"post\" action=\"" . SELF . "\">";
@@ -412,6 +459,7 @@ else if ( $action == "rename" )
 	$html .= "<input type=\"hidden\" name=\"prevpage\" value=\"" . htmlspecialchars($page) . "\" />";
 	$html .= "</p></form>";
 }
+
 else if ( $action == "renamed" )
 {
 	$pp = $_REQUEST['prevpage'];
@@ -441,7 +489,8 @@ else if ( $action == "renamed" )
 		$html = "<p class=\"note\">Error renaming file</p>\n";
 	}
 }
-*/
+
+
 else if ( $action == "all_name" )
 {
 	$dir = opendir(PAGES_PATH);
@@ -454,11 +503,12 @@ else if ( $action == "all_name" )
 
 		$afile = preg_replace("/(.*?)\.md/", "<a href=\"" . SELF . VIEW . "/\\1\">\\1</a>", $file);
 		$efile = preg_replace("/(.*?)\.md/", "<a href=\"?action=edit&amp;page=\\1\">edit</a>", urlencode($file));
+		$rfile = preg_replace("/(.*?)\.md/", "<a href=\"?action=delete&amp;page=\\1\">delete</a>", urlencode($file));
+		$rmfile = preg_replace("/(.*?)\.md/", "<a href=\"?action=rename&amp;page=\\1\">rename</a>", urlencode($file));
 		$sfile = filesize(PAGES_PATH . "/$file");
 		$dfile = date(TITLE_DATE, filemtime(PAGES_PATH . "/$file"));
 
-		array_push($filelist, "<tr><td data-label=\"File\">$afile</td><td data-label=\"Date\">$dfile</td><td data-label=\"Size\">$sfile</td><td data-label=\"Action\">$efile</td></tr>");
-
+		array_push($filelist, "<tr><td data-label=\"File\">$afile</td><td data-label=\"Date\">$dfile</td><td data-label=\"Size\">$sfile</td><td data-label=\"Action\">$efile $rmfile $rfile</td></tr>");
 	}
 
 	closedir($dir);
@@ -474,6 +524,8 @@ else if ( $action == "all_name" )
 
 	$html .= "</tbody></table>\n";
 }
+
+
 else if ( $action == "all_date" )
 {
 	$html = "<table class=\"hoverable striped\"><thead><tr><th>File</th><th>Date</th><th>Size</th><th>Action</th></tr></thead><tbody>\n";
@@ -497,13 +549,57 @@ else if ( $action == "all_date" )
 	{
 		$afile = preg_replace("/(.*?)\.md/", "<a href=\"" . SELF . VIEW . "/\\1\">\\1</a>", $key);
 		$efile = preg_replace("/(.*?)\.md/", "<a href=\"?action=edit&amp;page=\\1\">edit</a>", urlencode($key));
+		$rfile = preg_replace("/(.*?)\.md/", "<a href=\"?action=delete&amp;page=\\1\">delete</a>", urlencode($key));
+		$rmfile = preg_replace("/(.*?)\.md/", "<a href=\"?action=rename&amp;page=\\1\">rename</a>", urlencode($key));
 		$sfile = filesize(PAGES_PATH . "/$key");
 
-		$html .= "<tr><td data-label=\"File\">$afile</td><td data-label=\"Date\">" . date(TITLE_DATE, $value) . "</td><td data-label=\"Size\">$sfile</td><td data-label=\"Action\">$efile</td></tr>\n";
+		$html .= "<tr><td data-label=\"File\">$afile</td><td data-label=\"Date\">" . date(TITLE_DATE, $value) . "</td><td data-label=\"Size\">$sfile</td><td data-label=\"Action\">$efile $rmfile $rfile</td></tr>\n";
 		
 	}
 	$html .= "</tbody></table>\n";
 }
+
+else if ( $action == "all_cards" )
+{
+	$html = "<div class=\"row\">\n";
+
+	$dir = opendir(PAGES_PATH);
+	$filelist = array();
+	while ( $file = readdir($dir) )
+	{
+		if ( $file{0} == "." )
+			continue;
+			
+		$filelist[$file] = filemtime(PAGES_PATH . "/$file");
+
+	}
+
+	closedir($dir);
+
+	arsort($filelist, SORT_NATURAL);
+
+
+		$html .= "<div class=\"container\"><div class=\"row\">";
+
+	foreach ($filelist as $key => $value)
+	{
+		$afile = preg_replace("/(.*?)\.md/", "<a href=\"" . SELF . VIEW . "/\\1\">\\1</a>", $key);
+		$efile = preg_replace("/(.*?)\.md/", "<a href=\"?action=edit&amp;page=\\1\">edit</a>", urlencode($key));
+		$rfile = preg_replace("/(.*?)\.md/", "<a href=\"?action=delete&amp;page=\\1\">delete</a>", urlencode($key));
+		$rmfile = preg_replace("/(.*?)\.md/", "<a href=\"?action=rename&amp;page=\\1\">rename</a>", urlencode($key));
+		$sfile = filesize(PAGES_PATH . "/$key");
+
+		$html .= "<div class=\"col-sm-12\"><div class=\"card fluid\">";
+		$html .= "<p class=\"doc\">". date(TITLE_DATE, $value) ."</p>";
+		$html .= "<h3 class=\"doc\">$afile</h3>";
+		$html .= "<p class=\"doc\">Size: $sfile</p>";
+		$html .= "<p class=\"doc\">$efile $rmfile $rfile</p></div>";
+		
+	}
+	$html .= "</div></div></div>\n";
+}
+
+
 else if ( $action == "search" )
 {
 	$matches = 0;
@@ -570,14 +666,13 @@ else
 
 // Disable caching on the client (the iPhone is pretty agressive about this
 // and it can cause problems with the editing function)
-
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
 print "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n";
 print "<html>\n";
 print "<head>\n";
-print "<link rel=\"apple-touch-icon\" href=\"apple-touch-icon.png\"/>";
+print "<link rel=\"apple-touch-icon\" href=\"icon.png\"/>";
 print "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=false\" />\n";
 
 print "<link type=\"text/css\" rel=\"stylesheet\" href=\"" . BASE_URI . "/mini.css\" />\n";
@@ -595,7 +690,6 @@ print "<span class=\"button\">$datetime</span>\n";
 printDrawer();
 print "</header>";
 
-
 print "<div class=\"main\">\n";
 print "$html\n";
 print "</div>\n";
@@ -604,6 +698,7 @@ print "<form method=\"post\" action=\"" . SELF . "?action=search\">\n";
 print "<input class=\"button\" placeholder=\"Search\" id=\"search\" type=\"text\" name=\"q\" /><input id=\"ok\" type=\"submit\" value=\"Search\" /></form>\n";
 
 print "<footer class=\"sticky\">\n";
+print "<p><img src=\"icon.png\" ></p>\n";
 print "<p>". FOOTER_TEXT . "</p>\n";
 print "</footer>\n";
 
