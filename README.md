@@ -173,7 +173,11 @@ Other Contributions
   - Changed file extensions from txt to md
   - Add a drawer with markdown syntax for help
   - Cleanup folder structure and main files
-
+  - Added new cards style to view all files
+    - Note: In order to show cards aligned to top, css files needs to be modified .card{ align-self:top; (instead of center)
+  - Added [ TOC ] option (autogenerate table of content)
+  - Added 3 css flavours by default and link to generate your own
+  - Modified All and Recent to include more details (size and date) and actions (delete and rename)
 
 1.1 (May 2008)
 
