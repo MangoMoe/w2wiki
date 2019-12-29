@@ -10,7 +10,7 @@
  * Written with Coda: <http://panic.com/coda/>
  *
  *
- * Updated to new version by Ionel BOBOC (Bobby)
+ * Updated to new version by Ionel BOBOC (Bobby) <http://boboc.net/>
  * 2019
  * https://github.com/iboboc/w2wiki
  *
@@ -89,11 +89,24 @@ define('VALID_UPLOAD_EXTS', 'jpg,jpeg,png,gif,pdf,zip,dmg');
 
 define('DEFAULT_PAGE', 'Home');
 
+// CSS_FILE
+//
+// The CSS file to load to style the wiki, relative to BASE_URI
+// default is mini-default.css
+// you can change to prebuilt flavors: mini-dark.css and mini-nord.css
+// or customize and generate your own here: https://minicss.org/flavors
+
+//define('CSS_FILE', 'mini-default.css');
+//define('CSS_FILE', 'mini-dark.css');
+//define('CSS_FILE', 'mini-nord.css');
+define('CSS_FILE', 'mini-bobby.css');
+
+
 // FOOTER
 //
 // The text in the footer
 
-define('FOOTER_TEXT', '&copy; 2019 Bobby | Galati (<a href="https:\\github.com\iboboc\w2wiki">GITHUB</a>)');
+define('FOOTER_TEXT', '&copy; 2019 Bobby | Galati (<a href="https://iboboc.github.io/w2wiki/">w2wiki</a>)');
 
 // TITLE_DATE
 //
@@ -116,7 +129,7 @@ define('EDIT_ROWS', 18);
 // to the named page. This might degrade performance if you have many
 // thousands of pages.
 
-define('AUTOLINK_PAGE_TITLES', true);
+define('AUTOLINK_PAGE_TITLES', false);
 
 
 // -----------------------------
@@ -127,14 +140,14 @@ define('AUTOLINK_PAGE_TITLES', true);
 //
 // Is a password required to access this wiki?
 
-define('REQUIRE_PASSWORD', false);
+define('REQUIRE_PASSWORD', true);
 
 // W2_PASSWORD
 //
 // The password for the wiki, if REQUIRE_PASSWORD is true
 // Replace 'secret' with your password to set your password.
 
-define('W2_PASSWORD', '');
+define('W2_PASSWORD', 'bobby123');
 
 // W2_PASSWORD_HASH
 //
