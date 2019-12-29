@@ -37,7 +37,8 @@
 1. Create a directory for W2 somewhere in your web server's document root path.  It doesn't matter where.  W2 requires PHP 4 or higher.
    
 2. Upload the W2 files to this directory.  When you're done, it should look something like this:
-   
+
+```
    w2/
        Michelf
        images/
@@ -48,6 +49,7 @@
        mini-default.min.css 
        index.php
        README.md
+```
        
 3. Make sure that the "images" and "pages" directories are writable by your web server process.
    
