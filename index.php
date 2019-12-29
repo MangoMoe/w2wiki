@@ -10,7 +10,7 @@
  *
  * Written with Coda: <http://panic.com/coda/>
  *
- * Updated to new version by Ionel BOBOC (Bobby)
+ * Updated to new version by Ionel BOBOC (Bobby) <http://boboc.net/>
  * 2019
  * https://github.com/iboboc/w2wiki
  *
@@ -20,6 +20,7 @@
 spl_autoload_register(function($class){
 	require str_replace('\\', DIRECTORY_SEPARATOR, ltrim($class, '\\')).'.php';
 });
+
 
 // Get Markdown class
 use Michelf\MarkdownExtra;
@@ -70,7 +71,7 @@ if ( REQUIRE_PASSWORD && !isset($_SESSION['password']) )
 		print "<link rel=\"apple-touch-icon\" href=\"icon.png\"/>";
 		print "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=false\" />\n";
 		
-		print "<link type=\"text/css\" rel=\"stylesheet\" href=\"" . BASE_URI . "/mini.css\" />\n";
+		print "<link type=\"text/css\" rel=\"stylesheet\" href=\"" . BASE_URI . "/" . CSS_FILE ."\" />\n";
 		print "<title>Log In</title>\n";
 		print "</head>\n";
 		print "<body><div class=\"container\"><form method=\"post\">";
@@ -87,42 +88,38 @@ if ( REQUIRE_PASSWORD && !isset($_SESSION['password']) )
 function markdown_toc($file)
 {
 
-  // ensure using only "\n" as line-break
-  $source = str_replace(["\r\n", "\r"], "\n", $file);
+	$raw_toc = []; 
 
-  // look for markdown TOC items
-  preg_match_all(
-    '/^(#).*$/m',
-    $source,
-    $matches,
-    PREG_PATTERN_ORDER | PREG_OFFSET_CAPTURE
-  );
+	// ensure using only "\n" as line-break
+	$source = str_replace(["\r\n", "\r"], "\n", $file);
 
-  // preprocess: iterate matched lines to create an array of items
-  // where each item is an array(level, text)
-  $file_size = strlen($source);
-  foreach ($matches[0] as $item) {
-    $found_mark = substr($item[0], 0, 1);
-    if ($found_mark == '#') {
-      // text is the found item
-      $item_text = $item[0];
-      $item_level = strrpos($item_text, '#') + 1;
-      $item_text = substr($item_text, $item_level);
-    } else {
-      // text is the previous line (empty if <hr>)
-      $item_offset = $item[1];
-      $prev_line_offset = strrpos($source, "\n", -($file_size - $item_offset + 2));
-      $item_text =
-        substr($source, $prev_line_offset, $item_offset - $prev_line_offset - 1);
-      $item_text = trim($item_text);
-      $item_level = $found_mark == '=' ? 1 : 2;
-    }
-    if (!trim($item_text) OR strpos($item_text, '|') !== FALSE) {
-      // item is an horizontal separator or a table header, don't mind
-      continue;
-    }
-    $raw_toc[] = ['level' => $item_level, 'text' => trim($item_text)];
-  }
+	// look for markdown TOC items
+	preg_match_all('/^(#).*$/m', $source, $matches, PREG_PATTERN_ORDER | PREG_OFFSET_CAPTURE);
+
+	// preprocess: iterate matched lines to create an array of items
+	// where each item is an array(level, text)
+	$file_size = strlen($source);
+	foreach ($matches[0] as $item) {
+		$found_mark = substr($item[0], 0, 1);
+		if ($found_mark == '#') {
+		// text is the found item
+		$item_text = $item[0];
+		$item_level = strrpos($item_text, '#') + 1;
+		$item_text = substr($item_text, $item_level);
+	} else {
+		// text is the previous line (empty if <hr>)
+		$item_offset = $item[1];
+		$prev_line_offset = strrpos($source, "\n", -($file_size - $item_offset + 2));
+		$item_text = substr($source, $prev_line_offset, $item_offset - $prev_line_offset - 1);
+		$item_text = trim($item_text);
+		$item_level = $found_mark == '=' ? 1 : 2;
+	}
+	if (!trim($item_text) OR strpos($item_text, '|') !== FALSE) {
+		// item is an horizontal separator or a table header, don't mind
+		continue;
+	}
+	$raw_toc[] = ['level' => $item_level, 'text' => trim($item_text)];
+	}
 	$toc_text = "<h1>Table of Content</h1>";
 	foreach ($raw_toc as $key => $value)
 	{
@@ -139,7 +136,7 @@ function printDrawer()
 	print "<input type=\"checkbox\" id=\"drawer-control\" class=\"drawer persistent\">\n<div>\n";
 	print "<label for=\"drawer-control\" class=\"drawer-close\"></label>\n";
 	print "<h5><b>Markdown Syntax Helper</b>\n";
-	print "<small>[TOC]</small>\n";	
+	print "<small>[TOC]</small>\n";
 	print "<small># Header 1</small>\n";
 	print "<small>## Header 2</small>\n";
 	print "<small>### Header 3</small>\n";
@@ -172,7 +169,6 @@ function printDrawer()
 	print "</div>\n";
 }
 
-
 function printToolbar()
 {
 	global $upage, $page, $action;
@@ -190,7 +186,7 @@ function printToolbar()
 	print "<a class=\"button\" href=\"" . SELF . "?action=all_cards\">Cards</a> ";
  	
 	if ( REQUIRE_PASSWORD )
-		print '<a class="button" href="' . SELF . '?action=logout"><span class=\"icon-lock\"></span> Exit</a>';
+		print "<a class=\"button\" href=\"" . SELF . "?action=logout\"><span class=\"icon-lock\"></span> Exit</a>";
 
 	print "</header>\n";
 }
@@ -234,7 +230,8 @@ function toHTML($inText)
 	{	
 		foreach ( $filenames as $filename )
 		{
-	 		$inText = preg_replace("/(?<![\>\[\/])($filename)(?!\]\>)/im", "<a href=\"" . SELF . VIEW . "/$filename\">\\1</a>", $inText);
+	 		//to be fixed: autolink links 
+			$inText = preg_replace("/(?<![\>\[\/])($filename)(?!\]\>)/im", "<a href=\"" . SELF . VIEW . "/$filename\">\\1</a>", $inText);
 		}
 	}
 	
@@ -246,6 +243,7 @@ function toHTML($inText)
 	$inText = preg_replace("/\[TOC\]/", $tocText, $inText);
 
 	$html = MarkdownExtra::defaultTransform($inText);
+	
 	$inText = htmlentities($inText);
 
 	return $html;
@@ -287,7 +285,7 @@ if ( !function_exists('file_put_contents') )
 }
 
 // Main code
-	global $text;
+global $text;
 
 if ( isset($_REQUEST['action']) )
 	$action = $_REQUEST['action'];
@@ -295,7 +293,7 @@ else
 	$action = 'view';
 
 // Look for page name following the script name in the URL, like this:
-// http://stevenf.com/w2demo/index.php/Markdown%20Syntax
+// http://boboc.net/w2demo/index.php/Markdown%20Syntax
 //
 // Otherwise, get page name from 'page' request variable.
 
@@ -323,18 +321,17 @@ else
 	}
 }
 
+
 if ( $action == "edit" || $action == "new" )
 {
 	$formAction = SELF . (($action == 'edit') ? "/$page" : "");
 	$html = "<form id=\"edit\" method=\"post\" action=\"$formAction\">\n";
 	$html .= "<fieldset>\n";
 
-
 	if ( $action == "edit" )
 		$html .= "<input type=\"hidden\" name=\"page\" value=\"$page\" />\n";
 	else
 		$html .= "<label for=\"title\">Title</label><input id=\"title\" type=\"text\" name=\"page\" style=\"width:100%;\" />\n";
-
 
 	if ( $action == "new" )
 		$text = " ";
@@ -345,14 +342,17 @@ if ( $action == "edit" || $action == "new" )
 	$html .= "<input id=\"cancel\" type=\"button\" onclick=\"history.go(-1);\" value=\"Cancel\" />\n";
 	$html .= "</fieldset>\n";
 	$html .= "</form>\n";
-
 }
+
+
 else if ( $action == "logout" )
 {
 	destroy_session();
 	header("Location: " . SELF);
 	exit;
 }
+
+
 else if ( $action == "upload" )
 {
 	if ( DISABLE_UPLOADS )
@@ -371,6 +371,7 @@ else if ( $action == "upload" )
 		$html .= "</p></form>\n";
 	}
 }
+
 else if ( $action == "uploaded" )
 {
 	if ( !DISABLE_UPLOADS )
@@ -403,6 +404,7 @@ else if ( $action == "uploaded" )
 
 	$html .= toHTML($text);
 }
+
 else if ( $action == "save" )
 {
 	$newText = $_REQUEST['newText'];
@@ -420,7 +422,6 @@ else if ( $action == "save" )
 }
 
 
-//experimental
 else if ( $action == "delete" )
 {
 	$html = "<form id=\"delete\" method=\"post\" action=\"" . SELF . "\">";
@@ -443,7 +444,10 @@ else if ( $action == "deleted" )
  	error_reporting($errLevel);
 
 	if ( $success )	
+	{
 		$html = "<span class=\"toast\">Deleted</span>\n";
+		header("Location: " . SELF);
+	}
 	else
 		$html = "<span class=\"toast\">Error deleting file! Make sure your web server has write access to " . PAGES_PATH . "</span>\n";
 }
@@ -452,7 +456,7 @@ else if ( $action == "deleted" )
 else if ( $action == "rename" )
 {
 	$html = "<form id=\"rename\" method=\"post\" action=\"" . SELF . "\">";
-	$html .= "<p>Title: <input id=\"title\" type=\"text\" name=\"page\" value=\"" . htmlspecialchars($page) . "\" />";
+	$html .= "<p>Title: <input id=\"title\" type=\"text\" name=\"newpage\" value=\"" . htmlspecialchars($page) . "\" />";
 	$html .= "<input id=\"rename\" type=\"submit\" value=\"Rename\">";
 	$html .= "<input id=\"cancel\" type=\"button\" onclick=\"history.go(-1);\" value=\"Cancel\" />\n";
 	$html .= "<input type=\"hidden\" name=\"action\" value=\"renamed\" />";
@@ -463,30 +467,37 @@ else if ( $action == "rename" )
 else if ( $action == "renamed" )
 {
 	$pp = $_REQUEST['prevpage'];
-	$pg = $_REQUEST['page'];
+	$pg = $_REQUEST['newpage'];
 
 	$prevpage = sanitizeFilename($pp);
 	$prevpage = urlencode($prevpage);
+
+	$newpage = sanitizeFilename($pg);
+	$newpage = urlencode($newpage);
 	
 	$prevfilename = PAGES_PATH . "/$prevpage.md";
+	$newfilename = PAGES_PATH . "/$newpage.md";
 
-	if ( rename($prevfilename, $filename) )
+	if ( rename($prevfilename, $newfilename) )
 	{
 		// Success.  Change links in all pages to point to new page
-		if ( $dh = opendir(PAGES_PATH) )
-		{
-			while ( ($file = readdir($dh)) !== false )
-			{
-				$content = file_get_contents($file);
-				$pattern = "/\[\[" . $pp . "\]\]/g";
-				preg_replace($pattern, "[[$pg]]", $content);
-				file_put_contents($file, $content);
-			}
-		}
+		// Not working. To be fixed.
+		// if ( $dh = opendir(PAGES_PATH) )
+		// {
+		//	while ( ($file = readdir($dh)) !== false )
+		//	{
+		//		$content = file_get_contents($file);
+		//		$pattern = "/\[\[" . $pp . "\]\]/g";
+		//		preg_replace($pattern, "[[$pg]]", $content);
+		//		file_put_contents($file, $content);
+		//	}
+		//}
+		$html = "<span class=\"toast\">Renamed from $prevpage to $newpage". SELF ."</span>\n";
+		header("Location: " . SELF . "/$newpage");
 	}
 	else
 	{
-		$html = "<p class=\"note\">Error renaming file</p>\n";
+		$html = "<span class=\"toast\">Error renaming file $prevpage $newpage</span>\n";
 	}
 }
 
@@ -507,8 +518,11 @@ else if ( $action == "all_name" )
 		$rmfile = preg_replace("/(.*?)\.md/", "<a href=\"?action=rename&amp;page=\\1\">rename</a>", urlencode($file));
 		$sfile = filesize(PAGES_PATH . "/$file");
 		$dfile = date(TITLE_DATE, filemtime(PAGES_PATH . "/$file"));
+		$cfile = file_get_contents(PAGES_PATH . "/$file", FALSE, NULL, 0, 400);
 
 		array_push($filelist, "<tr><td data-label=\"File\">$afile</td><td data-label=\"Date\">$dfile</td><td data-label=\"Size\">$sfile</td><td data-label=\"Action\">$efile $rmfile $rfile</td></tr>");
+
+
 	}
 
 	closedir($dir);
@@ -528,7 +542,7 @@ else if ( $action == "all_name" )
 
 else if ( $action == "all_date" )
 {
-	$html = "<table class=\"hoverable striped\"><thead><tr><th>File</th><th>Date</th><th>Size</th><th>Action</th></tr></thead><tbody>\n";
+	$html = "<table class=\"hoverable striped\"><thead><tr><th>File</th><th>Content</th></tr></thead><tbody>\n";
 
 	$dir = opendir(PAGES_PATH);
 	$filelist = array();
@@ -541,7 +555,7 @@ else if ( $action == "all_date" )
 
 	}
 
-	closedir($dir);
+	closedir($dir); 
 
 	arsort($filelist, SORT_NATURAL);
 
@@ -552,12 +566,14 @@ else if ( $action == "all_date" )
 		$rfile = preg_replace("/(.*?)\.md/", "<a href=\"?action=delete&amp;page=\\1\">delete</a>", urlencode($key));
 		$rmfile = preg_replace("/(.*?)\.md/", "<a href=\"?action=rename&amp;page=\\1\">rename</a>", urlencode($key));
 		$sfile = filesize(PAGES_PATH . "/$key");
+		$cfile = file_get_contents(PAGES_PATH . "/$key", FALSE, NULL, 0, 400);
 
-		$html .= "<tr><td data-label=\"File\">$afile</td><td data-label=\"Date\">" . date(TITLE_DATE, $value) . "</td><td data-label=\"Size\">$sfile</td><td data-label=\"Action\">$efile $rmfile $rfile</td></tr>\n";
+		$html .= "<tr><td data-label=\"File\">$afile<br>" . date(TITLE_DATE, $value) . "<br>$efile $rmfile $rfile</td><td data-label=\"Content\">$cfile</td></tr>\n";
 		
 	}
 	$html .= "</tbody></table>\n";
 }
+
 
 else if ( $action == "all_cards" )
 {
@@ -579,24 +595,41 @@ else if ( $action == "all_cards" )
 	arsort($filelist, SORT_NATURAL);
 
 
-		$html .= "<div class=\"container\"><div class=\"row\">";
+		$html .= "<div class=\"row\">";
 
 	foreach ($filelist as $key => $value)
-	{
+	{	
 		$afile = preg_replace("/(.*?)\.md/", "<a href=\"" . SELF . VIEW . "/\\1\">\\1</a>", $key);
 		$efile = preg_replace("/(.*?)\.md/", "<a href=\"?action=edit&amp;page=\\1\">edit</a>", urlencode($key));
 		$rfile = preg_replace("/(.*?)\.md/", "<a href=\"?action=delete&amp;page=\\1\">delete</a>", urlencode($key));
 		$rmfile = preg_replace("/(.*?)\.md/", "<a href=\"?action=rename&amp;page=\\1\">rename</a>", urlencode($key));
 		$sfile = filesize(PAGES_PATH . "/$key");
+		// will get sample content, 200 chars from position 0
+		$cfile = file_get_contents(PAGES_PATH . "/$key", FALSE, NULL, 0, 200);
 
-		$html .= "<div class=\"col-sm-12\"><div class=\"card fluid\">";
-		$html .= "<p class=\"doc\">". date(TITLE_DATE, $value) ."</p>";
-		$html .= "<h3 class=\"doc\">$afile</h3>";
-		$html .= "<p class=\"doc\">Size: $sfile</p>";
-		$html .= "<p class=\"doc\">$efile $rmfile $rfile</p></div>";
+ 		$cfile = preg_replace("/\[\[(.*?)\]\]/", "<a href=\"" . SELF . VIEW . "/\\1\">\\1</a>", $cfile);
+		$cfile = preg_replace("/\{\{(.*?)\}\}/", "<img src=\"" . BASE_URI . "/images/\\1\" alt=\"\\1\" />", $cfile);
+		$cfile = preg_replace("/message:(.*?)\s/", "[<a href=\"message:\\1\">email</a>]", $cfile);
+		$tocText = markdown_toc($cfile);
+		$cfile = preg_replace("/\[TOC\]/", $tocText, $cfile);
+		$hcfile = MarkdownExtra::defaultTransform($cfile);
+
+		$html .= "<div class=\"card small\">";
+		$html .= "<h3>$afile</h3>";
+		$html .= "<hr>$hcfile<br>";
+		$html .= "<hr><h6>". date(TITLE_DATE, $value) ."</h6><br>";
+		$html .= "</div>";
+
 		
 	}
-	$html .= "</div></div></div>\n";
+	$html .= "</div></div>\n";
+}
+
+
+else if ( $action == "export" )
+{
+$html = "<span class=\"toast\">Exported</span>\n";
+header("Location: " . SELF);
 }
 
 
@@ -644,6 +677,9 @@ if ($action == "all_name")
 
 else if ($action == "all_date")
 	$title = "Recent Pages";
+
+else if ($action == "all_cards")
+	$title = "All Pages";
 	
 else if ( $action == "upload" )
 	$title = "Upload Image";
@@ -666,6 +702,7 @@ else
 
 // Disable caching on the client (the iPhone is pretty agressive about this
 // and it can cause problems with the editing function)
+
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
@@ -675,7 +712,7 @@ print "<head>\n";
 print "<link rel=\"apple-touch-icon\" href=\"icon.png\"/>";
 print "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=false\" />\n";
 
-print "<link type=\"text/css\" rel=\"stylesheet\" href=\"" . BASE_URI . "/mini.css\" />\n";
+print "<link type=\"text/css\" rel=\"stylesheet\" href=\"" . BASE_URI . "/" . CSS_FILE ."\" />\n";
 print "<title>$title</title>\n";
 print "</head>\n";
 print "<body>\n";
@@ -687,6 +724,7 @@ print "<span class=\"logo\">$title</span>\n";
 if ($datetime == "")
  $datetime= date(TITLE_DATE);
 print "<span class=\"button\">$datetime</span>\n";
+print "<a class=\"button\" href=\"" . SELF . "?action=export\"><span class=\"icon-share\"></span> PDF</a> ";
 printDrawer();
 print "</header>";
 
