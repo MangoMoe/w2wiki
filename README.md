@@ -46,7 +46,11 @@
            Home.md
            Markdown Syntax.md
        config.php
-       mini-default.min.css 
+       mini-default.css 
+       mini-dark.css
+       mini-nord.css
+       mini-bobby.css
+       icon.png
        index.php
        README.md
 ```
