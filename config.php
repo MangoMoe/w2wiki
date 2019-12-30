@@ -140,14 +140,14 @@ define('AUTOLINK_PAGE_TITLES', false);
 //
 // Is a password required to access this wiki?
 
-define('REQUIRE_PASSWORD', true);
+define('REQUIRE_PASSWORD', false);
 
 // W2_PASSWORD
 //
 // The password for the wiki, if REQUIRE_PASSWORD is true
 // Replace 'secret' with your password to set your password.
 
-define('W2_PASSWORD', 'bobby123');
+define('W2_PASSWORD', 'secret');
 
 // W2_PASSWORD_HASH
 //
